@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Taller Cordova Apache</title>
+                <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" charset="utf-8">
+            
+            var pictureSource;   // picture source
+            var destinationType; // sets the format of returned value
+            
+            // Wait for device API libraries to load
+            //
+            document.addEventListener("deviceready",onDeviceReady,false);
+            
+            // device APIs are available
+            //
+            function onDeviceReady() {
+                pictureSource=navigator.camera.PictureSourceType;
+                destinationType=navigator.camera.DestinationType;
+                var element = document.getElementById('deviceProperties');
+                element.innerHTML = 'Device Name: '     + device.name     + '<br />' +
+                'Device Cordova: '  + device.cordova  + '<br />' +
+                'Device Platform: ' + device.platform + '<br />' +
+                'Device UUID: '     + device.uuid     + '<br />' +
+                'Device Model: '    + device.model    + '<br />' +
+                'Device Version: '  + device.version  + '<br />';
+
+            }
+            
+            // Called when a photo is successfully retrieved
+            //
+            function onPhotoDataSuccess(imageData) {
+                // Uncomment to view the base64-encoded image data
+                // console.log(imageData);
+                
+                // Get image handle
+                //
+                var smallImage = document.getElementById('smallImage');
+                
+                // Unhide image elements
+                //
+                smallImage.style.display = 'block';
+                
+                // Show the captured photo
+                // The inline CSS rules are used to resize the image
+                //
+                smallImage.src = "data:image/jpeg;base64," + imageData;
+            }
+            
+            // Called when a photo is successfully retrieved
+            //
+            function onPhotoURISuccess(imageURI) {
+                // Uncomment to view the image file URI
+                // console.log(imageURI);
+                
+                // Get image handle
+                //
+                var largeImage = document.getElementById('largeImage');
+                
+                // Unhide image elements
+                //
+                largeImage.style.display = 'block';
+                
+                // Show the captured photo
+                // The inline CSS rules are used to resize the image
+                //
+                largeImage.src = imageURI;
+            }
+            
+            // A button will call this function
+            //
+            function capturePhoto() {
+                // Take picture using device camera and retrieve image as base64-encoded string
+                navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,
+                                            destinationType: destinationType.DATA_URL });
+            }
+            
+            // A button will call this function
+            //
+            function capturePhotoEdit() {
+                // Take picture using device camera, allow edit, and retrieve image as base64-encoded string
+                navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
+                                            destinationType: destinationType.DATA_URL });
+            }
+            
+            // A button will call this function
+            //
+            function getPhoto(source) {
+                // Retrieve image file location from specified source
+                navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50,
+                                            destinationType: destinationType.FILE_URI,
+                                            sourceType: source });
+            }
+            
+            // Called if something bad happens.
+            //
+            function onFail(message) {
+                alert('Failed because: ' + message);
+            }
+            
+            function obtainContacts(){
+            
+                var options = new ContactFindOptions();
+                options.filter = "";
+                var filter = ["displayName"];
+                navigator.contacts.find(filter, onSuccess, onError, options);
+            }
+            
+            
+            
+            function onSuccess(contacts) {
+                var element = document.getElementById('showContacts');
+                var elementsToInner=null;
+                alert(""+contacts.length);
+                for (var i = 0; i < contacts.length; i++) {
+                    
+                    if(elementsToInner==null){
+                        elementsToInner = 'Display Name : ' + contacts[i].displayName+ '<div/>';
+                    }else{
+                        elementsToInner = elementsToInner+'Display Name : ' + contacts[i].displayName+ '<div/>';
+                    }
+
+                }
+                
+                element.innerHTML=elementsToInner;
+            }
+            
+            // onError: Failed to get the contacts
+            
+            function onError(contactError) {
+                alert('onError!');
+            }
+            
+            function openExternalURL(){
+            
+                var ref = window.open('http://www.remiam.org', '_blank', 'location=yes');
+                ref.addEventListener('loadstart', function(event) { alert('start: ' + event.url); });
+                ref.addEventListener('loadstop', function(event) { alert('stop: ' + event.url); });
+                ref.addEventListener('loaderror', function(event) { alert('error: ' + event.message); });
+                ref.addEventListener('exit', function(event) { alert(event.type); });
+
+            }
+
+            </script>
+    </head>
+    <body>
+        <p id="deviceProperties">Loading device properties...</p>
+        <button onclick="obtainContacts();">Obtain Contacts</button> <br>
+        <div id="showContacts">Show Contacts...</div>
+        <button onclick="capturePhoto();">Capture Photo</button> <br>
+        <button onclick="capturePhotoEdit();">Capture Editable Photo</button> <br>
+        <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">From Photo Library</button><br>
+        
+        <button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button><br>
+        <button onclick="openExternalURL();">Open External URL</button> <br>
+
+        <img style="display:none;width:100px;height:100px;" id="smallImage" src="" />
+        <img style="display:none;width:120px;height:120px;" id="largeImage" src="" />
+    </body>
+</html>
